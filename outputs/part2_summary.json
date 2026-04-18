@@ -1,0 +1,26 @@
+{
+  "threshold": 0.5,
+  "high_black": {
+    "N": 162,
+    "toxic_pos": 45,
+    "non_toxic": 117,
+    "TPR": 0.6666666666666666,
+    "FPR": 0.15384615384615385,
+    "FNR": 0.3333333333333333,
+    "precision": 0.625,
+    "pos_rate": 0.2962962962962963
+  },
+  "reference": {
+    "N": 178,
+    "toxic_pos": 54,
+    "non_toxic": 124,
+    "TPR": 0.6296296296296297,
+    "FPR": 0.10483870967741936,
+    "FNR": 0.37037037037037035,
+    "precision": 0.723404255319149,
+    "pos_rate": 0.2640449438202247
+  },
+  "disparate_impact": 1.467455621301775,
+  "statistical_parity_difference": 0.03225135247607158,
+  "equal_opportunity_difference": 0.03703703703703698
+}
