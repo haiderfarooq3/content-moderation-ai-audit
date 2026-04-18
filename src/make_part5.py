@@ -62,31 +62,44 @@ CalibratedClassifierCV with `method='isotonic'` fits a piecewise-constant monoto
 
 code_calibrate = r"""from sklearn.model_selection import train_test_split
 from sklearn.calibration import CalibratedClassifierCV
+from sklearn.frozen import FrozenEstimator
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.isotonic import IsotonicRegression
 
-class FrozenProbaClf(BaseEstimator, ClassifierMixin):
+class FrozenProbaClf(ClassifierMixin, BaseEstimator):
+    _estimator_type = "classifier"
+
     def __init__(self, probs_by_idx):
         self.probs_by_idx = probs_by_idx
-        self.classes_ = np.array([0, 1])
+
     def fit(self, X, y=None):
-        self.classes_ = np.unique(y) if y is not None else self.classes_
+        self.classes_ = np.array([0, 1]) if y is None else np.unique(y)
+        self.n_features_in_ = 1
+        self.is_fitted_ = True
         return self
+
     def predict(self, X):
         idx = np.asarray(X).ravel().astype(int)
         return (self.probs_by_idx[idx] >= 0.5).astype(int)
+
     def predict_proba(self, X):
         idx = np.asarray(X).ravel().astype(int)
         p  = self.probs_by_idx[idx]
         return np.stack([1 - p, p], axis=1)
 
+    def __sklearn_tags__(self):
+        tags = super().__sklearn_tags__()
+        tags.estimator_type = "classifier"
+        tags.classifier_tags.poor_score = True
+        return tags
+
 idx = np.arange(len(eval_df))
 idx_cal, idx_demo = train_test_split(idx, test_size=15_000, stratify=eval_df["label"].values, random_state=SEED)
 
-# --- CalibratedClassifierCV (official API) -------------------------------
+# --- CalibratedClassifierCV (official API, sklearn >= 1.6 uses FrozenEstimator) ----
 clf = FrozenProbaClf(eval_probs)
 clf.fit(idx_cal.reshape(-1,1), eval_df["label"].values[idx_cal])
-ccv = CalibratedClassifierCV(clf, method="isotonic", cv="prefit")
+ccv = CalibratedClassifierCV(FrozenEstimator(clf), method="isotonic")
 ccv.fit(idx_cal.reshape(-1,1), eval_df["label"].values[idx_cal])
 
 # Also fit a simple IsotonicRegression — used to create the lightweight

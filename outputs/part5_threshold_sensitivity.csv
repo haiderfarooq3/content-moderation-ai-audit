@@ -1,0 +1,4 @@
+band,review_count,review_fraction,auto_count,auto_F1,auto_precision,auto_recall,review_toxic_rate
+0.45-0.55,5,0.005,995,0.6575,0.8276,0.5455,1.0
+0.4-0.6,20,0.02,980,0.6167,0.8605,0.4805,0.8
+0.3-0.7,68,0.068,932,0.6981,0.8605,0.5873,0.4412
