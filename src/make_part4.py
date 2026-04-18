@@ -186,12 +186,20 @@ print(pd.DataFrame({"group": train_df["group_high_black"].values,
 code_train_t1 = r"""REWEIGH_DIR = ROOT / "models" / "reweighed"
 REWEIGH_DIR.mkdir(parents=True, exist_ok=True)
 
-train_ds_rw = make_ds(train_df, weights=sample_w)
-eval_ds     = make_ds(eval_df)
+eval_ds = make_ds(eval_df)
 
-t0 = time.time()
-rw_model = train_model(train_ds_rw, eval_ds, REWEIGH_DIR)
-print(f"Reweighing training wall time: {(time.time()-t0)/60:.1f} min")
+# If the reweighed model is already on disk (from an earlier run), skip the
+# 60+ min retrain and reload it directly — same artefact, no difference.
+rw_ckpt = REWEIGH_DIR / "model.safetensors"
+if rw_ckpt.exists():
+    print("reusing reweighed checkpoint at", REWEIGH_DIR)
+    rw_model = AutoModelForSequenceClassification.from_pretrained(str(REWEIGH_DIR))
+    rw_model.to(device); rw_model.eval()
+else:
+    train_ds_rw = make_ds(train_df, weights=sample_w)
+    t0 = time.time()
+    rw_model = train_model(train_ds_rw, eval_ds, REWEIGH_DIR)
+    print(f"Reweighing training wall time: {(time.time()-t0)/60:.1f} min")
 
 rw_probs = predict_probs(rw_model, eval_ds)
 np.save(ROOT / "outputs" / "eval_probs_reweighed.npy", rw_probs)
@@ -289,11 +297,16 @@ hb_train = train_df[train_df["group_high_black"] == 1]
 train_over = pd.concat([train_df] + [hb_train] * 3, ignore_index=True)
 print("original train rows:", len(train_df), "| oversampled train rows:", len(train_over))
 
-train_ds_over = make_ds(train_over)
-
-t0 = time.time()
-over_model = train_model(train_ds_over, eval_ds, OVER_DIR)
-print(f"Oversampled training wall time: {(time.time()-t0)/60:.1f} min")
+ov_ckpt = OVER_DIR / "model.safetensors"
+if ov_ckpt.exists():
+    print("reusing oversampled checkpoint at", OVER_DIR)
+    over_model = AutoModelForSequenceClassification.from_pretrained(str(OVER_DIR))
+    over_model.to(device); over_model.eval()
+else:
+    train_ds_over = make_ds(train_over)
+    t0 = time.time()
+    over_model = train_model(train_ds_over, eval_ds, OVER_DIR)
+    print(f"Oversampled training wall time: {(time.time()-t0)/60:.1f} min")
 
 over_probs = predict_probs(over_model, eval_ds)
 np.save(ROOT / "outputs" / "eval_probs_oversampled.npy", over_probs)

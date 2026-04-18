@@ -1,0 +1,7 @@
+{
+  "model": "threshold_opt (fairlearn)",
+  "F1_toxic": 0.6688,
+  "equal_opp_diff": -0.0778,
+  "FPR_high_black": 0.1197,
+  "FPR_reference": 0.129
+}
