@@ -135,8 +135,10 @@ metric = ClassificationMetric(
 )
 spd = metric.statistical_parity_difference()
 eod = metric.equal_opportunity_difference()
-print(f"statistical_parity_difference : {spd:+.4f}  (negative = high-black flagged more)")
-print(f"equal_opportunity_difference  : {eod:+.4f}  (negative = high-black TPR lower)")"""
+# aif360 convention: difference = unprivileged_rate - privileged_rate.
+# Here unprivileged = high-black, so positive SPD = high-black flagged more.
+print(f"statistical_parity_difference : {spd:+.4f}  (positive = high-black flagged MORE often)")
+print(f"equal_opportunity_difference  : {eod:+.4f}  (positive = high-black TPR HIGHER than reference)")"""
 
 md_viz = r"""## 4. Visualisations"""
 
