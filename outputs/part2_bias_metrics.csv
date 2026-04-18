@@ -1,2 +1,0 @@
-high_black_N,high_black_toxic_pos,high_black_non_toxic,high_black_TPR,high_black_FPR,high_black_FNR,high_black_precision,high_black_pos_rate,reference_N,reference_toxic_pos,reference_non_toxic,reference_TPR,reference_FPR,reference_FNR,reference_precision,reference_pos_rate,disparate_impact
-162,45,117,0.6666666666666666,0.15384615384615385,0.3333333333333333,0.625,0.2962962962962963,178,54,124,0.6296296296296297,0.10483870967741936,0.37037037037037035,0.723404255319149,0.2640449438202247,1.467455621301775

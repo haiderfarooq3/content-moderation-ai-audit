@@ -1,5 +1,0 @@
-metric,baseline,poisoned,delta
-accuracy,0.9478,0.9447,-0.0031
-F1_macro,0.8193,0.8109,-0.0084
-F1_toxic,0.6669,0.6518,-0.0151
-FNR_toxic,0.3458,0.3527,0.0069

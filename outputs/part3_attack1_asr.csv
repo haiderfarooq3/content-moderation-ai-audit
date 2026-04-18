@@ -1,7 +1,0 @@
-metric,value
-sample_size,500.0
-originally_detected,500.0
-evaded,490.0
-ASR,0.98
-mean_conf_before,0.956980288028717
-mean_conf_after,0.03886227309703827

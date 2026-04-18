@@ -1,5 +1,0 @@
-model,F1_macro,F1_toxic,FPR_high_black,FPR_reference,stat_parity_diff,equal_opp_diff
-baseline,0.8193,0.6669,0.1538,0.1048,0.0323,0.037
-reweighed (aif360),0.8163,0.6613,0.0769,0.0968,-0.0615,-0.1222
-threshold_opt (fairlearn),0.8203,0.6688,0.1197,0.129,-0.0436,-0.0778
-oversampled (3x hb),0.8154,0.659,0.1282,0.0968,-0.0053,-0.0519

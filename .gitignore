@@ -1,27 +1,28 @@
-# dataset artefacts (too large for GitHub per assignment rules)
-data/*.csv
-data/*.zip
-data/*.parquet
-!data/.gitkeep
+# Per assignment submission rules — never commit dataset or checkpoints.
+# Patterns match anywhere in the tree.
+*.csv
+*.pt
+*.bin
+*.safetensors
+saved_model/
+trainer_out/
 
-# model checkpoints (too large)
-models/**/*.safetensors
-models/**/*.bin
-models/**/*.pt
-models/**/trainer_out/
-models/**/saved_model/
+# Other large artefacts
+*.zip
+*.parquet
+outputs/eval_probs_*.npy
 models/**/*.pkl
 
-# numpy probability caches
-outputs/eval_probs_*.npy
-
-# virtual env + bytecode
+# Virtual env + bytecode
 .venv/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
 
-# editor / OS
+# Editor / OS
 .DS_Store
 .vscode/
 .idea/
+
+# IDE workspace artefacts
+.claude/
