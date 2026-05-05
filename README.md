@@ -27,6 +27,44 @@ End-to-end audit of a production-style DistilBERT toxicity classifier trained on
 | Mitigation (best = fairlearn ThresholdOptimizer) | FPR gap 0.049 → **0.009** | EOD +0.037 → +0.078 |
 | Guardrail pipeline (1 000 eval comments) | auto-action F1 / review rate | **0.62 / 2 %** |
 
+## Figures
+
+### Part 1 — Baseline classifier
+![ROC and PR curves](outputs/part1_roc_pr.png)
+
+ROC and Precision-Recall curves on the 20 k eval set. Strong separation in both panels — the baseline DistilBERT discriminates well in the *aggregate*, which is exactly what makes the bias surfaced in Part 2 so easy to miss without disaggregation.
+
+### Part 2 — Bias audit
+![Confusion matrices, high-black vs reference](outputs/part2_cms.png)
+
+Side-by-side confusion matrices for the high-black and reference cohorts at threshold 0.5. The TP/FN split is similar between cohorts; the FP cell is visibly larger for the high-black cohort.
+
+![Grouped bar chart of cohort metrics](outputs/part2_grouped_bar.png)
+
+TPR / FPR / FNR / precision per cohort. TPR and FNR overlap closely; the FPR bar for high-black is the tallest and is the source of the 1.47× disparate-impact ratio.
+
+### Part 4 — Mitigation Pareto frontier
+![Fairness/accuracy Pareto frontier](outputs/part4_pareto.png)
+
+17-point sweep across (alpha, tolerance) for fairlearn `ThresholdOptimizer`. Each point trades macro-F1 against FPR-gap / equal-opportunity-difference. The selected operating point sits on the frontier — fairness improves with no measurable accuracy loss.
+
+### Part 5 — Pipeline behaviour on 1 000 comments
+![Layer distribution](outputs/part5_layer_distribution.png)
+
+How the 1 000 demo comments are routed: 937 auto-allow, 43 auto-block (regex + high-confidence model), 20 to human review. Under 7 % of traffic ever reaches a human across any tested threshold band.
+
+![Review-queue composition](outputs/part5_review_breakdown.png)
+
+Toxic vs. non-toxic mix inside the review queue. The 0.4–0.6 band concentrates genuinely ambiguous cases — exactly where human judgement is the right tool.
+
+## What we noticed
+
+- **Aggregate accuracy hides cohort harm.** Baseline macro-F1 of 0.819 looks healthy, but disaggregating reveals **FPR 0.154 on the high-black cohort vs. 0.105 on the reference cohort — a 1.47× disparate-impact ratio**. TPR and FNR were broadly equal across cohorts; the bias lives almost entirely in *false positives*, i.e. the model over-flags Black-attributed text rather than missing toxic Black-attributed text.
+- **The model is trivially evadable.** Character-level substitutions ("hate" → "h8t3", "kill" → "kil1") collapse confidence on confidently-toxic comments from **0.957 → 0.039** — **ASR 0.98 on 500 attempts**. A motivated user with a keyboard defeats the classifier.
+- **The training pipeline is a soft target.** Flipping just **5 %** of training labels raises FNR_toxic by **+0.7 pts** and drops macro-F1 by **−0.84 pts**. Any unaudited path into the labelling / data pipeline is a real risk.
+- **Mitigation works, and the cheapest mitigation wins.** Among the three techniques tried, **fairlearn's post-hoc `ThresholdOptimizer`** narrows the FPR gap from **0.049 → 0.009** with **no macro-F1 loss** (0.819 → 0.820). aif360 Reweighing also reduces the gap but over-corrects (statistical-parity flips sign). 3× oversampling balances the training data without closing the FPR gap. Per-group decision thresholds outperform retraining for this dataset.
+- **A single model is not a moderation system.** Part 5 shows that a three-layer pipeline — regex prefilter → calibrated model → human review — auto-actions the vast majority of traffic while **routing only ~2 %** of comments to humans. Calibration matters: raw logits are not probabilities, and isotonic post-hoc calibration is what makes the 0.4 / 0.6 thresholds meaningful.
+
 ## Environment
 
 - **Python 3.12.13** (project venv at `.venv/`).
